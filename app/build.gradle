@@ -17,6 +17,65 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    //方式一：
+//    productFlavors{
+//        wandoujia{
+//            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "wandoujia"]
+//        }
+//        xiaomi{
+//            manifestPlaceholders=[UMENG_CHANNEL_VALUE: "xiaomi"]
+//        }
+//    }
+    //优化1：
+//    productFlavors{
+//        wandoujia{
+//            //manifestPlaceholders = [UMENG_CHANNEL_VALUE: "wandoujia"]
+//        }
+//        xiaomi{
+//            //manifestPlaceholders=[UMENG_CHANNEL_VALUE: "xiaomi"]
+//        }
+//        //添加其他的渠道
+//        yingyongbao{}
+//
+//    }
+//    productFlavors.all { flavor ->
+//        flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+//    }
+
+    //优化2：
+    productFlavors{
+        wandoujia{
+            //manifestPlaceholders = [UMENG_CHANNEL_VALUE: "wandoujia"]
+        }
+        xiaomi{
+            //manifestPlaceholders=[UMENG_CHANNEL_VALUE: "xiaomi"]
+        }
+    }
+    productFlavors.all { flavor ->
+        flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                def fileName = outputFile.name.replace(".apk", "-${defaultConfig.versionName}.apk")
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
+
+//    private String getChannel() {
+//        try {
+//            PackageManager pm = getPackageManager();
+//            ApplicationInfo appInfo = pm.getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+//            return appInfo.metaData.getString("UMENG_CHANNEL");
+//        } catch (PackageManager.NameNotFoundException ignored) {
+//        }
+//        return "";
+//    }
+
+
 }
 
 dependencies {
@@ -27,4 +86,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
+    compile 'com.github.bumptech.glide:glide:4.3.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
 }
